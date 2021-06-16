@@ -11,8 +11,8 @@ import numpy as np
 import keras
 import os
 
-
-
+batch_size = 128
+epochs = 250
 
 
 
@@ -26,16 +26,19 @@ data = ImageDataGenerator(vertical_flip = True,
 
 traindata = data.flow_from_directory(directory="Data/",
                                      target_size = (50,50),
-                                     batch_size = 100,
+                                     batch_size = batch_size = batch_size,
                                      class_mode = 'categorical',
                                      subset  = 'training')
                                  
 
 validationdata = data.flow_from_directory(directory="Data/",
                                       target_size=(50,50),
-                                      batch_size =128,
+                                      batch_size = batch_size,
                                       class_mode = 'categorical',
                                       subset = 'validation') 
+
+steps_train = len(traindata.classes)/batch_size
+steps_val_ =  len(traindata.classes)/batch_size
 
 # Vgg 16
 
@@ -77,7 +80,7 @@ checkpoint = ModelCheckpoint("pinusvgg16.h5",
 
 early = EarlyStopping(monitor='val_loss',
           
-                      patience=100,
+                      patience=25,
                       
                       
                       mode='min')
@@ -87,4 +90,4 @@ csv_logger = CSVLogger('pinusvgg16.csv', append=True, separator=',')
   
 model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['categorical_accuracy'])
 
-model.fit(traindata, epochs = 250,validation_data=validationdata,callbacks =[checkpoint,csv_logger],steps_per_epoch=2,validation_steps=1)
+model.fit(traindata, epochs = epochs,validation_data=validationdata,callbacks =[checkpoint,csv_logger,early],steps_per_epoch=steps_train,validation_steps=steps_val)
