@@ -1,20 +1,17 @@
-from tensorflow.keras.layers import Conv2D,Flatten,Dense,MaxPool2D,BatchNormalization,GlobalAveragePooling2D,AveragePooling2D,Dropout,MaxPooling2D
-from tensorflow.keras.applications.resnet50 import preprocess_input, decode_predictions
-from tensorflow.keras.preprocessing.image import ImageDataGenerator,load_img
+#Importação de Bibliotecas
+from tensorflow.keras.layers import Flatten,Dense,BatchNormalization,Dropout
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications.resnet50 import ResNet50
-
-from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.models import Model
-import matplotlib.pyplot as plt
-import numpy as np
-import tensorflow.keras
-import os
 import keras
+from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger
 
+#Definição do batch_size e épocas
 batch_size = 128
 epochs = 250
 
+# Definação do objeto da Classe Image Data Generator que define o Gerador de Imagens e faz o Data Augmentation
+#Validation Split de 0.3 separa 70% das imagens para treino e 30% para validação.
 data = ImageDataGenerator(vertical_flip = True,
                             horizontal_flip = True,
                             brightness_range=[0.2,1.0],
@@ -22,7 +19,7 @@ data = ImageDataGenerator(vertical_flip = True,
                             rotation_range = 90
                           )
 
-
+# Definição dos gerador de imagens para serem utilizadas no treino
 traindata = data.flow_from_directory(directory="Data/",
                                      target_size = (50,50),
                                      batch_size = batch_size,
@@ -30,7 +27,7 @@ traindata = data.flow_from_directory(directory="Data/",
                                      subset  = 'training',
                                      )
                                     
-
+ # Definição dos gerador de imagens para serem utilizadas durante a validação
 validationdata = data.flow_from_directory(directory="Data/",
                                       target_size=(50,50),
                                       batch_size =batch_size,
@@ -39,18 +36,18 @@ validationdata = data.flow_from_directory(directory="Data/",
                                       
                                       ) 
 
+#Definição da quantidade de steps que ocorrerá durante cada época
 steps_train = len(traindata.classes)/batch_size
 steps_val = len(validationdata.classes)/batch_size
 
-from tensorflow.keras import layers
-from tensorflow.keras import Input
-from tensorflow.keras.applications.resnet50 import ResNet50
-
+#Import do modelo resnet50 treinado no dataset ImageNet, o input foi modificado para receber a resolução das Imagens
 res_model = ResNet50(include_top=False,weights='imagenet',input_shape=(50,50,3))
 
+# Congela o treinamento das camadas Convolucionais
 for layer in res_model.layers[:143]:
   layer.trainable = False
 
+#Criação do modelo, com as camadas convolucionais e camadas densas com BatchNormalization e Dropout.
 model = Sequential()
 model.add(res_model)
 model.add(Flatten())
@@ -67,8 +64,8 @@ model.add(BatchNormalization())
 model.add(Dense(traindata.num_classes,activation='sigmoid'))
 
 optimizer = keras.optimizers.Adam(learning_rate= 0.01)
-from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger
 
+# Definição de um Objeto Callback, que salva o Melhor modelo que possui a melhor acurácia de validação.
 checkpoint = ModelCheckpoint("pinusresnet50_2.h5",
                              verbose=1,
                              save_best_only=True,
@@ -77,11 +74,12 @@ checkpoint = ModelCheckpoint("pinusresnet50_2.h5",
                              save_weights_only=False,
                              mode='auto',
                              period=1)
+#Definição de um objeto Callback responsável por parar o treino se após 100 epocas o modelo não modificar A Loss de validação
 early = EarlyStopping(monitor='val_loss',
-                      patience=25,
+                      patience=100,
                                   
                       mode='min')
-csv_logger = CSVLogger('pinusresnet50_2.csv', append=True, separator=',')
+csv_logger = CSVLogger('pinusmodelresnet50_2.csv', append=True, separator=',')
 
 model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['categorical_accuracy'])
 
