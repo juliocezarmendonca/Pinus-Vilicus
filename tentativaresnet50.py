@@ -8,8 +8,9 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.models import Model
 import matplotlib.pyplot as plt
 import numpy as np
-import keras
+import tensorflow.keras
 import os
+import keras
 
 batch_size = 128
 epochs = 250
@@ -26,8 +27,7 @@ traindata = data.flow_from_directory(directory="Data/",
                                      target_size = (50,50),
                                      batch_size = batch_size,
                                      class_mode = 'categorical',
-                                     subset  = 'training'
-                                     shuffle = False
+                                     subset  = 'training',
                                      )
                                     
 
@@ -42,9 +42,9 @@ validationdata = data.flow_from_directory(directory="Data/",
 steps_train = len(traindata.classes)/batch_size
 steps_val = len(validationdata.classes)/batch_size
 
-from keras import layers
-from keras import Input
-from keras.applications.resnet50 import ResNet50
+from tensorflow.keras import layers
+from tensorflow.keras import Input
+from tensorflow.keras.applications.resnet50 import ResNet50
 
 res_model = ResNet50(include_top=False,weights='imagenet',input_shape=(50,50,3))
 
@@ -69,19 +69,19 @@ model.add(Dense(traindata.num_classes,activation='sigmoid'))
 optimizer = keras.optimizers.Adam(learning_rate= 0.01)
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger
 
-checkpoint = ModelCheckpoint("pinusresnet50.h5",
+checkpoint = ModelCheckpoint("pinusresnet50_2.h5",
                              verbose=1,
                              save_best_only=True,
                              monitor ='val_categorical_accuracy',
                              
-                             save_weights_only=True,
+                             save_weights_only=False,
                              mode='auto',
                              period=1)
 early = EarlyStopping(monitor='val_loss',
                       patience=25,
                                   
                       mode='min')
-csv_logger = CSVLogger('pinusresnet50.csv', append=True, separator=',')
+csv_logger = CSVLogger('pinusresnet50_2.csv', append=True, separator=',')
 
 model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['categorical_accuracy'])
 
