@@ -7,15 +7,11 @@ from PIL import ImageTk, Image
 from tkinter import filedialog
 import numpy as np
 from keras.models import load_model
-from keras.optimizers import Adam
 from keras.preprocessing.image import img_to_array
 
 
 # Carregando o modelo para predição
 model = load_model('pinusmodelresnet50.h5')
-optimizer = Adam(learning_rate= 0.01)
-model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['categorical_accuracy'])
-
 
 
 
@@ -56,16 +52,23 @@ def classify():
     result = tk.Label(frame,text= text_classe).pack()
 
 
-
+#Definição do Objeto Tkinter
 root = tk.Tk()
+#Título da Aplicação
 root.title('Pinus Vilicus!')
+#Ícone da aplicação
 root.iconbitmap('pine.ico')
+
 root.resizable(False, False)
+#Subtitulo
 tit = tk.Label(root, text="Pinus Vilicus: Supervisionando seus Pinheiros desde 2021!", padx=25, pady=6, font=("", 14)).pack()
+#Define o tamanho da borda interna e a cor
 canvas = tk.Canvas(root, height=500, width=500, bg='green')
 canvas.pack()
+#Define a cor da janela
 frame = tk.Frame(root, bg='grey')
 frame.place(relwidth=0.8, relheight=0.8, relx=0.1, rely=0.1)
+#Definições dos Botões
 chose_image = tk.Button(root, text='Escolha uma Imagem:',
                         padx=35, pady=10,
                         fg="black", bg="green", command=load_img)
@@ -75,5 +78,5 @@ class_image = tk.Button(root, text='Classifique a Imagem!',
                         fg="black", bg="green", command=classify)
 class_image.pack(side=tk.RIGHT)
 
-
+#Torna possivel refazer o processo de carregar imagens
 root.mainloop()

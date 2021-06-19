@@ -2,7 +2,7 @@
 import numpy as np
 from keras.models import load_model
 from PIL import Image
-from keras.optimizers import Adam
+
 from keras.preprocessing.image import img_to_array
 
 from sys import argv
@@ -10,8 +10,6 @@ from sys import argv
 image_data = argv[1]
 # Carregando o modelo para predição
 model = load_model('pinusmodelresnet50.h5')
-optimizer = Adam(learning_rate= 0.01)
-model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['categorical_accuracy'])
 
 
 original = Image.open(image_data)
