@@ -60,4 +60,3 @@ def home():
         prediction = None
     return render_template("index.html", form=form, file_url=file_url, prediction=prediction)
 
-app.run()
