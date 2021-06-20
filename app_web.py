@@ -1,62 +1,70 @@
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import SubmitField
+#Inspirado em:
+# https://github.com/jrosebr1/simple-keras-rest-api
 
-from flask import Flask
-#from flask_bootstrap import Bootstrap
-import os
 
-from keras.models import load_model
+# USAGE
+# Start the server:
+#     python run_keras_server.py
+# Submit a request via cURL:
+#     curl -X POST -F image=@dog.jpg 'http://localhost:5000/predict'
+# Submita a request via Python:
+#    python simple_request.py
+
+# import the necessary packages
 from keras.preprocessing.image import img_to_array
+from keras.applications import imagenet_utils
 from PIL import Image
-
 import numpy as np
+import flask
+import io
+from keras.models import load_model
 
-# Carregando o modelo para predição
-model = load_model('pinusmodelresnet50.h5')
+# initialize our Flask application and the Keras model
+app = flask.Flask(__name__)
+model = None
 
-class UploadForm(FlaskForm):
-    upload = FileField('Selecione uma Imagem:', validators=[
-        FileRequired(),
-        FileAllowed(['jpg', 'png', 'jpeg', 'JPEG', 'PNG', 'JPG'], 'Images only!')
-    ])
-    submit = SubmitField('Classifique')
-    
-    
+def load_mod():
+    # load the pre-trained Keras model (here we are using a model
+    # pre-trained on ImageNet and provided by Keras, but you can
+    # substitute in your own networks just as easily)
+    global model
+    model = load_model("pinusmodelresnet50.h5")
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-#bootstrap = Bootstrap(app)
+def prepare_image(image, target):
+    # if the image mode is not RGB, convert it
+    if image.mode != "RGB":
+        image = image.convert("RGB")
 
-def classify(image_data):
-    original = Image.open(image_data)
-    original = original.resize((50, 50), Image.ANTIALIAS)
-    numpy_image = img_to_array(original)
-    image_batch = np.expand_dims(numpy_image, axis=0)
-   
-    predictions = model.predict(image_batch)
-    label = np.argmax(predictions)
-    
-    if label == 0:
-        text_classe  = "Essa é uma imagem de Solo."
-    elif label == 1:
-        text_classe = "Essa é uma imagem de um Pinheiro."
+    # resize the input image and preprocess it
+    image = image.resize(target)
+    image = img_to_array(image)
+    image = np.expand_dims(image, axis=0)
+    image = imagenet_utils.preprocess_input(image)
+
+    # return the processed image
+    return image
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    text_classe = "Predição da Imagem: "
+    if flask.request.method == "POST":
+        if flask.request.files.get("image"):
+            image = flask.request.files["image"].read()
+            image = Image.open(io.BytesIO(image))
+            image = prepare_image(image, target=(50, 50))
+            predictions = model.predict(image)
+            label = np.argmax(predictions)
+            if label == 0:
+                text_classe += "Essa é uma Imagem de Solo."
+            elif label ==1:
+                text_classe += "Essa é uma Imagem de um Pinheiro."
     
     return text_classe
 
-@app.route('/', methods=['GET', 'POST'])
-def home():
-    form = UploadForm()
-    if form.validate_on_submit():
-        f = form.upload.data
-        filename = secure_filename(f.filename)
-        file_url = os.path.join('static', filename
-        )
-        f.save(file_url)
-        form = None
-        prediction = classify(file_url)
-    else:
-        file_url = None
-        prediction = None
-    return render_template("index.html", form=form, file_url=file_url, prediction=prediction)
+# if this is the main thread of execution first load the model and
+# then start the server
+if __name__ == "__main__":
+    print("* Carregando O modelo Resnet50 e Inicialziando o Server Flask..")
+    load_mod()
+    app.run(debug=True)
 
