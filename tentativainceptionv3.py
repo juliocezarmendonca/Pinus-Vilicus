@@ -3,7 +3,6 @@ from tensorflow.keras.layers import Flatten,Dense,BatchNormalization,Dropout,Glo
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.models import Model
 import keras
 
 

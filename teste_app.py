@@ -17,6 +17,7 @@ model = load_model('pinusmodelresnet50.h5')
 
 # Função responsável por carregar a imagem
 def load_img():
+    #Trecho não modificado do original
     global img, image_data
     for img_display in frame.winfo_children():
         img_display.destroy()
@@ -32,9 +33,10 @@ def load_img():
     file_name = image_data.split('/')
     panel = tk.Label(frame, text= str(file_name[len(file_name)-1]).upper()).pack()
     panel_image = tk.Label(frame, image=img).pack()
-
-# Função responsável por carregar a Imagem
+    #Fim do trecho
+# Função responsável por classificar a imagem carregada
 def classify():
+    #Trecho não modificado do original
     original = Image.open(image_data)
     original = original.resize((50, 50), Image.ANTIALIAS)
     numpy_image = img_to_array(original)
@@ -42,7 +44,7 @@ def classify():
    
     predictions = model.predict(image_batch)
     label = np.argmax(predictions)
-    
+    #Fim do trecho
     if label == 0:
         text_classe  = "Essa é uma imagem de Solo."
     elif label == 1:
@@ -68,11 +70,13 @@ canvas.pack()
 #Define a cor da janela
 frame = tk.Frame(root, bg='grey')
 frame.place(relwidth=0.8, relheight=0.8, relx=0.1, rely=0.1)
-#Definições dos Botões
+#Definição do Botão que executa a função de carregar a imagem 
 chose_image = tk.Button(root, text='Escolha uma Imagem:',
                         padx=35, pady=10,
                         fg="black", bg="green", command=load_img)
 chose_image.pack(side=tk.LEFT)
+
+#Definição do Botão que executa a função de Classificar a Imagem
 class_image = tk.Button(root, text='Classifique a Imagem!',
                         padx=35, pady=10,
                         fg="black", bg="green", command=classify)

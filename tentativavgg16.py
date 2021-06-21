@@ -1,15 +1,6 @@
-from tensorflow.keras.layers import Conv2D,Flatten,Dense,MaxPool2D,BatchNormalization,GlobalAveragePooling2D,AveragePooling2D,Dropout,MaxPooling2D
-from tensorflow.keras.applications.resnet50 import preprocess_input, decode_predictions
-from tensorflow.keras.preprocessing.image import ImageDataGenerator,load_img
-from tensorflow.keras.applications.resnet50 import ResNet50
 
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.models import Model
-import matplotlib.pyplot as plt
-import numpy as np
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import keras
-import os
 
 batch_size = 128
 epochs = 250
@@ -26,7 +17,7 @@ data = ImageDataGenerator(vertical_flip = True,
 
 traindata = data.flow_from_directory(directory="Data/",
                                      target_size = (50,50),
-                                     batch_size = batch_size = batch_size,
+                                     batch_size = batch_size,
                                      class_mode = 'categorical',
                                      subset  = 'training')
                                  
@@ -38,13 +29,9 @@ validationdata = data.flow_from_directory(directory="Data/",
                                       subset = 'validation') 
 
 steps_train = len(traindata.classes)/batch_size
-steps_val_ =  len(traindata.classes)/batch_size
+steps_val =  len(traindata.classes)/batch_size
 
 # Vgg 16
-
-
-from keras.applications.vgg16 import VGG16
-
 vgg16 = keras.applications.vgg16
 
 conv_model = vgg16.VGG16(weights='imagenet', include_top=False, input_shape=(50,50,3))
