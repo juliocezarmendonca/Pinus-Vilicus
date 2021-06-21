@@ -9,3 +9,5 @@ https://www.notion.so/Relat-rio-T-cnico-fc694dea17ff4287b41a7a088cca84c1
 As instruções de como rodar os códigos estão nesse link:
 
 https://www.notion.so/Como-utilizar-2b5d2406457446d89e0562036a725b94
+
+O Relatório e instruções dos códigos em pdf foi gerado a partir do notion  e se encontram no repositório.
